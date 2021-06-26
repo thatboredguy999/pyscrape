@@ -1,3 +1,9 @@
+import os, tempfile, subprocess
+
+def filelayout():
+	out, err = subprocess.Popen(["pdftotext", "-layout", 'H_2021_06_22.pdf','H_2021_06_22.txt']).communicate()
+
+
 with open('data2.txt','r') as file, open('hold.txt','w') as destination:
 	check=False
 	count=0
@@ -41,5 +47,6 @@ with open('data2.txt','r') as file, open('hold.txt','w') as destination:
 					count=0
 			if counton==True:
 				count +=1
-				
+if __name__=='__main__':
+	filelayout()
 				
