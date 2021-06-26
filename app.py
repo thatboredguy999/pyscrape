@@ -34,7 +34,7 @@ def insert_data(name):
                 password="root")
         cur = conn.cursor()
         cur.execute('''DROP TABLE IF EXISTS "{tab}";'''.format(tab=filename))
-        cur.execute('''CREATE TABLE "{tab}" (PhyDate char(50) PRIMARY KEY, Code char(50) SECONDARY KEY, ProdDate char(50) SECONDARY KEY, FSPrice char(50) NOT NULL);'''.format(tab=filename))
+        cur.execute('''CREATE TABLE "{tab}" (PhyDate char(50), Code char(50), ProdDate char(50), FSPrice char(50) NOT NULL);'''.format(tab=filename))
         with open(name , 'r') as f:
 
                 #print('PostgreSQL database version:')
@@ -58,6 +58,9 @@ def filelayout(filename):
         newfile2="".join((newfile2, addstring))
 
         with open('data.txt','r') as file, open(newfile2,'w') as destination:
+                filename=filename.strip('.pdf')
+                filename=filename.strip('H_')
+                filename=filename.replace('_', '/')
                 check=False
                 count=0
                 counton=False
@@ -69,7 +72,7 @@ def filelayout(filename):
                                 if word == 'H':
                                         check=True
                                         counton=True
-                                        destination.write('6/25/2021 '+ word+ ' ')
+                                        destination.write(filename +' '+ word+ ' ')
                                         print(word)
                                 elif count==2:
                                         hold=word
@@ -101,7 +104,7 @@ def filelayout(filename):
                                 if counton==True:
                                         count +=1
 
-
+        insert_data(newfile2)
 
 
 
