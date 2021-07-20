@@ -143,6 +143,18 @@ def filelayout(filename):
                                                 count=0
                                 if counton==True:
                                         count +=1
+        conn = psycopg2.connect(
+               host='localhost',
+               database='sample',
+               user='postgres',
+               password='root')
+        curr = conn.cursor()
+        curr.execute('''SELECT FSPrice FROM "FSPrice" WHERE PhyDate = '{tab}';'''.format(tab=(filename)))
+        temp1 = curr.fetchone()
+        if temp1 != None:
+             curr.execute('''DELETE FROM "FSPrice" WHERE PhyDate = '{tab}';'''.format(tab=(filename)))
+        conn.commit()
+        curr.close()
 
         insert_data(newfile2)
 
