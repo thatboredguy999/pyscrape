@@ -191,19 +191,42 @@ def queries():
 
 @app.route('/queries', methods=['POST'])
 def get_queries():
-	startrun = request.form.get('InfoType')
-	StartYear = request.form.get('StartYear')
-	StartMonth = request.form.get('StartMonth')
-	StartDay = request.form.get('StartDay')
-	MonthYear = request.form.get('MonthYear')
-	EndMonth = request.form.get('EndMonth')
-	EndDay = request.form.get('EndDay')
-	EndYear = request.form.get('EndYear')
+	
+	startrun = request.form.get('InfoType',None)
+	StartYear = request.form.get('StartYear',None)
+	StartMonth = request.form.get('StartMonth',None)
+	StartDay = request.form.get('StartDay',None)
+	MonthYear = request.form.get('MonthYear',None)
+	EndMonth = request.form.get('EndMonth',None)
+	EndDay = request.form.get('EndDay',None)
+	EndYear = request.form.get('EndYear',None)
+	test1=int(StartDay)
+	test2=int(StartMonth)
+	
+	if test1<= 9:
+		StartDay=int(StartDay)
+		StartDay=str(StartDay)
+		StartDay="".join(("0",StartDay))
+
+	if test2<=9:
+		StartMonth=int(StartMonth)
+		StartMonth=str(StartMonth)
+		StartMonth="".join(("0",StartMonth))
+
+	test12=int(EndDay)
+	test22=int(EndMonth)
+
+	if test12<=9:
+		EndDay=int(EndDay)
+		EndDay=str(EndDay)
+		EndDay="".join(("0",EndDay))
+	if test22<=9:
+		EndMonth=int(EndMonth)
+		EndMonth=str(EndMonth)
+		EndMonth="".join(("0",EndMonth))
 
 
-
-
-
+	print(startrun)
 	fill = "_"
 	startrun="".join((startrun, fill))
 	startrun="".join((startrun, StartYear))
@@ -218,15 +241,15 @@ def get_queries():
 
 	endrun = request.form.get('InfoType')
 	endrun= endrun + fill+ EndYear+ fill+ EndMonth+fill+EndDay+fill+MonthYear
-#	endrun="".join((startrun, fill))
-#	endrun="".join((startrun, EndYear))
-#	endrun="".join((startrun, fill))
-#	endrun="".join((startrun, EndMonth))
-#	endrun="".join((startrun, fill))
-#	endrun="".join((startrun, EndDay))
-#	endrun="".join((startrun, fill))
-#	endrun="".join((startrun, MonthYear))
-
+	#	endrun="".join((startrun, fill))
+	#	endrun="".join((startrun, EndYear))
+	#	endrun="".join((startrun, fill))
+	#	endrun="".join((startrun, EndMonth))
+	#	endrun="".join((startrun, fill))
+	#	endrun="".join((startrun, EndDay))
+	#	endrun="".join((startrun, fill))
+	#	endrun="".join((startrun, MonthYear))
+	
 	month=int(StartMonth)
 	day=int(StartDay)
 	year=int(StartYear)
@@ -261,9 +284,80 @@ def get_queries():
 			if month == 13:
 				month = 1
 				year +=1
+
 	query_data(querylist)
 	f = open("hold_query.txt","r")
 	return render_template('content.html',text=f.read()) 
+#	return (querylist)
+
+
+@app.route('/excel_queries', methods=['GET'])
+def excel_queries():
+
+        startrun = request.args.get('InfoType')
+        StartYear = request.args.get('StartYear')
+        StartMonth = request.args.get('StartMonth')
+        StartDay = request.args.get('StartDay')
+        MonthYear = request.args.get('MonthYear')
+        EndMonth = request.args.get('EndMonth')
+        EndDay = request.args.get('EndDay')
+        EndYear = request.args.get('EndYear')
+
+        print(startrun)
+        fill = "_"
+        print(startrun)
+        startrun="".join((startrun, fill))
+        print(StartYear)
+        startrun="".join((startrun, StartYear))
+        startrun="".join((startrun, fill))
+        startrun="".join((startrun, StartMonth))
+        startrun="".join((startrun, fill))
+        startrun="".join((startrun, StartDay))
+        startrun="".join((startrun, fill))
+        startrun="".join((startrun, MonthYear))
+        querylist=[]
+        querylist.append(startrun)
+
+        endrun = InfoType
+        endrun= startrun + fill+ EndYear+ fill+ EndMonth+fill+EndDay+fill+MonthYear
+        month=int(StartMonth)
+        day=int(StartDay)
+        year=int(StartYear)
+        stopMonth=int(EndMonth)
+        stopDay=int(EndDay)
+        stopYear=int(EndYear)
+
+        hold=startrun
+        print (startrun)
+        print (endrun)
+        while hold != endrun:
+
+                if day < 32:
+                        Pkey = request.form.get('InfoType')
+                        day +=1
+                        if day <10:
+                                hday='0'+str(day)
+                        else:
+                                hday=str(day)
+                        if month <10:
+                                hmonth='0'+str(month)
+                        else:
+                                hmonth=str(month)
+                        Pkey=Pkey + fill + str(year)+ fill + hmonth + fill + hday + fill + str (MonthYear)
+                        #print (Pkey)
+                        #print (startrun)
+                        querylist.append(Pkey)
+                        hold=Pkey
+                else:
+                        day = 1
+                        month +=1
+                        if month == 13:
+                                month = 1
+                                year +=1
+
+        query_data(querylist)
+        f = open("hold_query.txt","r")
+        return render_template('content.html',text=f.read())
 
 
 if __name__=="__main__":
