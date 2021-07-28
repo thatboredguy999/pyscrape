@@ -96,6 +96,7 @@ def filelayout(filename):
                 primkey=filename
                 primhold=filename
                 filename=filename.strip('H_')
+                filename=filename.strip('PMI')
                 filename=filename.replace('_', '/')
                 check=False
                 count=0
@@ -103,17 +104,24 @@ def filelayout(filename):
                 hold= ' '
                 test=True
                 broken=False
+                PMITest=False
                 for line in file:
                         for word in line.split():
-                                if word == 'H':
+                                if word == 'H' or word == 'PMI':
                                         check=True
                                         counton=True
                                         destination.write(filename +' '+ word+ ' ')
                                         print(word)
+                                        code=word
                                 elif count==2:
                                         hold=word
-
-
+                                elif count>=3 and code=='PMI':
+                                        tempword= float(word)
+                                        if tempword<5:
+                                           PMITest = True
+                                           count = 6
+                                        else:
+                                           hold=word
                                 elif check==True :
                                         check=False
                                         hold="_"
@@ -121,26 +129,41 @@ def filelayout(filename):
                                         destination.write(word + ' ')
                                         print(word)
                                 elif count==5 :
-                                        if ',' in word:
+                                        if ',' in word and code !='PMI':
                                                 broken=True
 
-                                elif count==6 :
+                                if count==6 :
                                         if '0' in word:
                                                 broken=True
 
-                                        if broken==True:
+                                        if broken==True or PMITest==True:
                                                 counton=False
                                                 count=0
                                                 destination.write(hold + ' '+primkey+'\n')
-                                                primkey=primhold
+                                                print(primkey)
                                                 print(hold)
+                                                primkey=primhold
                                                 broken=False
-                                        else:
+                                        elif broken==False and code=='H':
                                                 print(word)
                                                 destination.write(word +' '+primkey+ '\n')
+                                                print(primkey)
                                                 primkey=primhold
                                                 counton=False
                                                 count=0
+                                        elif PMITest==False and code=='PMI':
+                                                hold=word
+                                if count==7:
+                                        tempword = float(word)
+                                        if tempword<1:
+                                         destination.write(hold + ' '+primkey+ '\n')
+                                         primkey=primhold
+                                         counton=False
+                                         count=0
+                                         PMITest==False
+
+
+
                                 if counton==True:
                                         count +=1
         conn = psycopg2.connect(
