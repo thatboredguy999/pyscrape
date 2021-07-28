@@ -96,7 +96,9 @@ def filelayout(filename):
                 primkey=filename
                 primhold=filename
                 filename=filename.strip('H_')
-                filename=filename.strip('PMI')
+                filename=filename.strip('PMI_')
+                filename=filename.strip('MSO_')
+                filename=filename.strip('OPJ_')
                 filename=filename.replace('_', '/')
                 check=False
                 count=0
@@ -107,7 +109,7 @@ def filelayout(filename):
                 PMITest=False
                 for line in file:
                         for word in line.split():
-                                if word == 'H' or word == 'PMI':
+                                if word=='H' or word=='PMI' or word=='MSO' or word=='OPJ':
                                         check=True
                                         counton=True
                                         destination.write(filename +' '+ word+ ' ')
@@ -115,7 +117,7 @@ def filelayout(filename):
                                         code=word
                                 elif count==2:
                                         hold=word
-                                elif count>=3 and code=='PMI':
+                                elif count>=3 and code!='H':
                                         tempword= float(word)
                                         if tempword<5:
                                            PMITest = True
@@ -129,7 +131,7 @@ def filelayout(filename):
                                         destination.write(word + ' ')
                                         print(word)
                                 elif count==5 :
-                                        if ',' in word and code !='PMI':
+                                        if ',' in word and code =='H':
                                                 broken=True
 
                                 if count==6 :
@@ -151,7 +153,7 @@ def filelayout(filename):
                                                 primkey=primhold
                                                 counton=False
                                                 count=0
-                                        elif PMITest==False and code=='PMI':
+                                        elif PMITest==False and code!='H':
                                                 hold=word
                                 if count==7:
                                         tempword = float(word)
