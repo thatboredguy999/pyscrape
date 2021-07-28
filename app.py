@@ -174,16 +174,18 @@ def upload():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-        uploaded_file = request.files['PDF_file']
-        filename = secure_filename(uploaded_file.filename)
-        if uploaded_file.filename != '':
+ #       uploaded_file = flask.request.files.getlist['PDF_file[]']
+#        print (uploaded_file)
+       for f in request.files.getlist('PDF_file[]'): 
+          filename = secure_filename(f.filename)
+          if f.filename != '':
                 file_ext = os.path.splitext(filename)[1]
                 if file_ext not in app.config['UPLOAD_EXTENSIONS']: # file_ext != validate_image(uploaded_file.stream):
                        abort(400)
-                uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'],filename))
+                f.save(os.path.join(app.config['UPLOAD_PATH'],filename))
 
-        filelayout(filename)
-        return redirect(url_for('index'))
+          filelayout(filename)
+       return redirect(url_for('index'))
 
 @app.route('/queries')
 def queries():
