@@ -453,7 +453,7 @@ def trade_info_mod():
              curr.execute('''SELECT * FROM "Trade" WHERE trade_date LIKE '%{tab}%';'''.format(tab=(datelist[i])))
              temp = curr.fetchall()
              i+=1
-             print (temp)
+            
              if temp != "[]":
                  flength=len(temp)
                  j=0
@@ -471,7 +471,7 @@ def get_host():
 
 	"""Download a file."""
 	try:
-		return send_from_directory("/home/unix/pyscrape/", 'host.csv', as_attachment=True)
+		return send_from_directory("/home/pyscrapeadmin/pyscrape/", 'host.csv', as_attachment=True)
 	except FileNotFoundError:
 		abort(404)
 
