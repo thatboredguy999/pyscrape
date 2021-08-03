@@ -1,6 +1,8 @@
 import psycopg2, tempfile, subprocess, requests
-from flask import Flask, json, jsonify, Response
-import os
+from flask import Flask, json, jsonify, Response, send_from_directory
+import os, os.path
+from shutil import copyfile
+from os import path
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 import imghdr
@@ -385,6 +387,93 @@ def excel_queries():
         query_data(querylist)
         f = open("hold_query.txt","r")
         return render_template('content.html',text=f.read())
+
+@app.route('/tradeinfo')
+def trade():
+	return render_template('trade.html')
+
+
+@app.route('/tradeinfo', methods=['POST'])
+def trade_info_mod():
+        startday= request.form.get('StartDay',None)
+        startmonth= request.form.get('StartMonth', None)
+        startyear= request.form.get('StartYear', None)
+        endday= request.form.get('EndDay', None)
+        endmonth= request.form.get('EndMonth', None)
+        endyear= request.form.get('EndYear', None)
+
+        datelist=[]
+
+        date="".join((startmonth,"/",startday,"/",startyear))
+
+        datelist.append(date)
+
+        day=int(startday)
+        month=int(startmonth)
+        year=int(startyear)
+
+        check=False
+        while check != True:
+           if str(day)==endday and str(month)==endmonth and str(year)==endyear:
+              check=True
+           else:
+               if day<32:
+                 day+=1
+               else:
+                 day=1
+                 month+=1
+               if month>12:
+                 month=1
+                 year+=1
+               date="".join((str(month),"/",str(day),"/",str(year)))
+               datelist.append(date)
+
+
+           startstring="".join((startmonth,"_",startday,"_",startyear))
+           endstring="".join((endmonth,"_",endday,"_",endyear))
+
+           filename="".join((startstring,"_",endstring,".csv"))
+           filecheck=path.exists(filename)
+           if filecheck==True:
+               os.remove(filename)
+           
+           f = open(filename,"w+")
+
+           conn = psycopg2.connect(
+                host='localhost',
+                database='sample',
+                user='postgres',
+                password='root')
+           curr = conn.cursor()
+           temp = ""
+           i=0
+           length1=len(datelist)
+           
+           while i < length1:
+             curr.execute('''SELECT * FROM "Trade" WHERE trade_date LIKE '%{tab}%';'''.format(tab=(datelist[i])))
+             temp = curr.fetchall()
+             i+=1
+             print (temp)
+             if temp != "[]":
+                 flength=len(temp)
+                 j=0
+                 while j < flength:
+                    f.write(str(temp[j]))
+                    f.write("\n")
+                    j+=1
+           conn.commit()
+           curr.close()
+        copyfile(filename, "host.csv")
+        return (filename)
+
+@app.route('/host.csv', methods = ['GET'])
+def get_host():
+
+	"""Download a file."""
+	try:
+		return send_from_directory("/home/unix/pyscrape/", 'host.csv', as_attachment=True)
+	except FileNotFoundError:
+		abort(404)
 
 
 if __name__=="__main__":
