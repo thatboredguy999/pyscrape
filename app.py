@@ -426,6 +426,7 @@ def trade_info_mod():
                  month=1
                  year+=1
                date="".join((str(month),"/",str(day),"/",str(year)))
+               print (date)
                datelist.append(date)
 
 
@@ -474,6 +475,9 @@ def get_host():
 		return send_from_directory("/home/unix/pyscrape/", 'host.csv', as_attachment=True)
 	except FileNotFoundError:
 		abort(404)
+
+@app.route('/excel_change', methods = ['POST']
+def change_trades():
 
 
 if __name__=="__main__":
