@@ -12,6 +12,8 @@ app = Flask(__name__)
 
 app.config['UPLOAD_EXTENSIONS']=['.pdf']
 app.config['UPLOAD_PATH'] = 'uploads'
+app.config['UPLOAD_PATH_2']='edit_uploads'
+
 
 def validate_image(stream):
 	header = stream.read(512)
@@ -185,6 +187,20 @@ def filelayout(filename):
 
         insert_data(newfile2)
 
+
+def trade_edit_up(filename):
+	filepath='edit_uploads/{}'.format(filename)
+	conn = psycopg2.connect(
+		host='localhost',
+		database='sample',
+		user='postgres',
+		password='root')
+	curr = conn.cursor()
+	tablename='Trade'
+	with open(filename , 'r') as f:
+
+		#print('PostgreSQL database version:')
+		cur.copy_from(f, tablename, sep=' ')
 
 
 
@@ -426,7 +442,7 @@ def trade_info_mod():
                  month=1
                  year+=1
                date="".join((str(month),"/",str(day),"/",str(year)))
-               print (date)
+             #  print (date)
                datelist.append(date)
 
 
@@ -450,7 +466,11 @@ def trade_info_mod():
            i=0
            length1=len(datelist)
            
-           while i < length1:
+           os.remove("host.csv")
+           t = open("host.csv","w+")
+
+#           return (filename)
+           while i != length1:
              curr.execute('''SELECT * FROM "Trade" WHERE trade_date LIKE '%{tab}%';'''.format(tab=(datelist[i])))
              temp = curr.fetchall()
              i+=1
@@ -458,14 +478,29 @@ def trade_info_mod():
              if temp != "[]":
                  flength=len(temp)
                  j=0
-                 while j < flength:
+                 while j != flength:
+                    t.write(str(temp[j]))
                     f.write(str(temp[j]))
+                    t.write("\n")
                     f.write("\n")
                     j+=1
            conn.commit()
            curr.close()
         copyfile(filename, "host.csv")
         return (filename)
+
+@app.route('/trade_upload')
+def trade_upload_html():
+        return render_template('trade_upload.html')
+
+
+@app.route('/trade_upload',methods = ['POST'])
+def trade_upload():
+	file = request.files['Data']
+	filename = secure_filename(file.filename)
+	file.save(os.path.join(app.config['UPLOAD_PATH_2'],filename))
+	trade_edit_up(filename)
+	return redirect(url_for('index'))
 
 @app.route('/host.csv', methods = ['GET'])
 def get_host():
@@ -476,8 +511,8 @@ def get_host():
 	except FileNotFoundError:
 		abort(404)
 
-@app.route('/excel_change', methods = ['POST']
-def change_trades():
+#@app.route('/excel_change', methods = ['POST']
+#def change_trades():
 
 
 if __name__=="__main__":
