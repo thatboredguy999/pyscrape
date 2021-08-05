@@ -197,10 +197,23 @@ def trade_edit_up(filename):
 		password='root')
 	curr = conn.cursor()
 	tablename='Trade'
-	with open(filename , 'r') as f:
-
-		#print('PostgreSQL database version:')
-		cur.copy_from(f, tablename, sep=' ')
+	holdlist=[]
+	check=1
+	with open(filepath , 'r') as f:
+		for line in f:
+			
+			for word in line.split():
+				if check==1:
+#					word=word.strip("'")
+					word=word.strip("('")
+					curr.execute('''SELECT trade_date FROM "Trade" WHERE id = '{tab}';'''.format(tab=(word)))
+					temp= curr.fetchone()
+					if temp != None:
+						curr.execute('''DELETE FROM "Trade" WHERE id = '{tab}';'''.format(tab=(word)))
+					print(word)
+					check+=1
+			check=1		#print('PostgreSQL database version:')
+		curr.execute('''COPY "Trade" FROM '/home/unix/pyscrape/edit_uploads/{tab}' DELIMITER ',' CSV;'''.format(tab=(filename)))
 
 
 
