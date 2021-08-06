@@ -189,6 +189,7 @@ def filelayout(filename):
 
 
 def trade_edit_up(filename):
+#	os.remove("trade_temp.csv")
 	filepath='edit_uploads/{}'.format(filename)
 	conn = psycopg2.connect(
 		host='localhost',
@@ -198,7 +199,12 @@ def trade_edit_up(filename):
 	curr = conn.cursor()
 	tablename='Trade'
 	holdlist=[]
+	dirtylist=[]
 	check=1
+	list=0
+	i=0
+	tfile= open("trade_temp.csv","w+")
+	ttfile= open("trade_temp.txt","r")
 	with open(filepath , 'r') as f:
 		for line in f:
 			
@@ -206,14 +212,67 @@ def trade_edit_up(filename):
 				if check==1:
 #					word=word.strip("'")
 					word=word.strip("('")
-					curr.execute('''SELECT trade_date FROM "Trade" WHERE id = '{tab}';'''.format(tab=(word)))
+					word=word.strip("',,,,,,,,,,'")
+					for word1 in word.split():
+						if word1.isdigit():
+							list=int(word1)
+					curr.execute('''SELECT id FROM "Trade" WHERE id = '{tab}';'''.format(tab=(list)))
 					temp= curr.fetchone()
+					temp= str(temp)
+					temp=temp.strip(",)")
+					temp="".join((temp,")"))
+					holdlist.append(list)
+					dirtylist.append(temp)
 					if temp != None:
-						curr.execute('''DELETE FROM "Trade" WHERE id = '{tab}';'''.format(tab=(word)))
+						print (temp)
+						curr.execute('''DELETE FROM "Trade" WHERE id = '{tab}';'''.format(tab=(list)))
+ #						i+=1
+						print ('delete')
 					print(word)
 					check+=1
-			check=1		#print('PostgreSQL database version:')
-		curr.execute('''COPY "Trade" FROM '/home/unix/pyscrape/edit_uploads/{tab}' DELIMITER ',' CSV;'''.format(tab=(filename)))
+					#tfile.write(str(list))
+				if check>1:
+					list=word.strip("('")
+					list=word.strip(",,,,,,,,,,")
+					list=word.strip(")")
+					list=word.strip("'")
+					list="".join((list," "))
+					list=list.strip(" )")
+					if "(" in list:
+						list="".join((list,")"))
+#					list=list.strip(",")
+#					list="".join((list," "))
+					tfile.write(str(list))
+
+					check+=1		#print('PostgreSQL database version:')
+			tfile.write("\n")
+			check=1
+	name='trade_temp.csv'
+	conn.commit()
+	curr.close()
+
+
+def info_up():
+
+	conn = psycopg2.connect(
+		host='localhost',
+		database='sample',
+		user='postgres',
+		password='root')
+	curr = conn.cursor()
+	name='trade_temp.csv'
+	tablename='Trade'
+#	name='trade_temp.txt'
+	with open(name , 'r') as t:
+		#print('PostgreSQL database version:')
+		curr.copy_from(t, tablename, sep=',')
+	conn.commit()
+	curr.close()
+
+
+
+
+
 
 
 
@@ -513,6 +572,7 @@ def trade_upload():
 	filename = secure_filename(file.filename)
 	file.save(os.path.join(app.config['UPLOAD_PATH_2'],filename))
 	trade_edit_up(filename)
+	info_up()
 	return redirect(url_for('index'))
 
 @app.route('/host.csv', methods = ['GET'])
