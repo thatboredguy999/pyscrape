@@ -203,9 +203,17 @@ def trade_edit_up(filename):
 	check=1
 	list=0
 	i=0
+
+	countcol=1
+
+	filer= open("trade_temp.txt","w+")
 	tfile= open("trade_temp.csv","w+")
-	ttfile= open("trade_temp.txt","r")
+	ttfile= open("trade_temp.csv","r")
+
+	newline=False
+
 	with open(filepath , 'r') as f:
+		holdid=0
 		for line in f:
 			
 			for word in line.split():
@@ -216,6 +224,11 @@ def trade_edit_up(filename):
 					for word1 in word.split():
 						if word1.isdigit():
 							list=int(word1)
+					holdid+=1
+#					if int(list) >0:
+#						checkpass=True
+#					else:
+#						checkpass=False
 					curr.execute('''SELECT id FROM "Trade" WHERE id = '{tab}';'''.format(tab=(list)))
 					temp= curr.fetchone()
 					temp= str(temp)
@@ -224,14 +237,31 @@ def trade_edit_up(filename):
 					holdlist.append(list)
 					dirtylist.append(temp)
 					if temp != None:
-						print (temp)
+#						print (temp)
 						curr.execute('''DELETE FROM "Trade" WHERE id = '{tab}';'''.format(tab=(list)))
  #						i+=1
-						print ('delete')
+#						print ('delete')
 					print(word)
 					check+=1
 					#tfile.write(str(list))
 				if check>1:
+					filer.write(str(list))
+					filer.write("\n")
+#					print(list)
+					if newline==True:
+						tfile.write("\n")
+						newline=False
+
+					if " " in str(list):
+						countcol+=1
+						print(countcol)
+						list=list.strip(",")
+						list="".join((list," "))
+
+					if countcol==11:
+#						tfile.write("\n")
+						countcol=1
+						newline=True
 					list=word.strip("('")
 					list=word.strip(",,,,,,,,,,")
 					list=word.strip(")")
@@ -240,12 +270,22 @@ def trade_edit_up(filename):
 					list=list.strip(" )")
 					if "(" in list:
 						list="".join((list,")"))
+
+					if list == ",":
+						list=list.strip(",")
+						list="".join((list," "))
+					if str(list) == "N/A,":
+						list="N/A "
+
 #					list=list.strip(",")
 #					list="".join((list," "))
+					print(list)
+#					if list == "":
+#						print("FUCK")
 					tfile.write(str(list))
 
 					check+=1		#print('PostgreSQL database version:')
-			tfile.write("\n")
+#			tfile.write("\n")
 			check=1
 	name='trade_temp.csv'
 	conn.commit()
@@ -265,7 +305,7 @@ def info_up():
 #	name='trade_temp.txt'
 	with open(name , 'r') as t:
 		#print('PostgreSQL database version:')
-		curr.copy_from(t, tablename, sep=',')
+		curr.copy_from(t, tablename, sep=' ')
 	conn.commit()
 	curr.close()
 
