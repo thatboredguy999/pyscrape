@@ -25,25 +25,24 @@ def validate_image(stream):
 
 
 def insert_data(name):
+#called to insert data into the table for Marks Upload
 
         sql = """INSERT INTO new(PhyDate, Code, ProdDate, FSPrice)
                 VALUES(%s);"""
         filename, file_extension = os.path.splitext(name)
         command =('CREATE TABLE {tab} (PhyDate, Code, ProdDate, FSPrice,PrKey)')
 
-
+#Database connection
         conn = psycopg2.connect(
                 host="localhost",
                 database="sample",
                 user="postgres",
                 password="root")
         cur = conn.cursor()
-       # cur.execute('''DROP TABLE IF EXISTS "{tab}";'''.format(tab=filename))
-       # cur.execute('''CREATE TABLE "{tab}" (PhyDate char(50), Code char(50), ProdDate char(50), FSPrice char(50) NOT NULL, PrKey char(50) PRIMARY KEY);'''.format(tab=filename))
+#Name of table to store data
         tablename='FSPrice'
+#Copies information from file passed to function as name, into table
         with open(name , 'r') as f:
-
-                #print('PostgreSQL database version:')
                 cur.copy_from(f, tablename, sep=' ')
         conn.commit()
         cur.close()
@@ -56,7 +55,11 @@ def insert_data(name):
 
 
 def query_data(querylist):
+#Function called to write query response to a file
+
+#removes old file
 	os.remove("hold_query.txt")
+#Opens Connection Database
 	conn = psycopg2.connect(
 		host="localhost",
 		database="sample",
@@ -67,10 +70,12 @@ def query_data(querylist):
 	i=0
 
 	f = open("hold_query.txt","a")
+#Runs through database using passed querylist as the Primary Key value
 	while i < length1:
 		cur.execute('''SELECT FSPrice FROM "FSPrice" WHERE PrKey= '{tab}';'''.format(tab=(querylist[i])))
 		temp = cur.fetchone()
 		temp = str(temp)
+#If the Primary Key returns a value, this writes the Key and the Futures Price to the "hold_query" file
 		if temp != "None":
 			f.write(querylist[i])
 			f.write(temp)
